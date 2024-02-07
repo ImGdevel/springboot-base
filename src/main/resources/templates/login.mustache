@@ -60,6 +60,7 @@
         <hr>
         <input id="username" type="text" name="username" placeholder="ID">
         <input id="password" type="password" name="password" placeholder="Password">
+        <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
         <input type="submit" value="Login">
     </form>
 </body>
