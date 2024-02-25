@@ -6,6 +6,7 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -17,7 +18,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-     @Bean
+    @Bean
     public RoleHierarchy roleHierarchy() {
 
         RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
@@ -29,23 +30,28 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain fitterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain fitterChain(HttpSecurity http) throws Exception {
 
-        http.authorizeHttpRequests((auth)-> auth
-                .requestMatchers("/", "/login", "/join").permitAll()
-                .requestMatchers("/admin").hasAnyRole("ADMIN")
-                .requestMatchers("/api/**").hasAnyRole("USER")
-                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**", "/api/**").permitAll() // 임시 swagger 허용
-                .anyRequest().denyAll()
-            ).formLogin((form)->form
-                .loginPage("/login")
-                .loginProcessingUrl("/login")
-                .permitAll()
-            )
-            .csrf(auth -> auth.disable()
-            );
+        http.authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/", "/login", "/join").permitAll()
+                        .requestMatchers("/admin").hasAnyRole("ADMIN")
+                        .requestMatchers("/api/**").hasAnyRole("USER")
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**", "/api/**").permitAll() // 임시 swagger 허용
+                        .anyRequest().denyAll()
+                )
+                .formLogin((auth) -> auth
+                        .disable()
+                )
+                .sessionManagement((session) -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .csrf(auth -> auth
+                        .disable()
+                )
+                .httpBasic((auth) -> auth
+                        .disable()
+                );
 
         return http.build();
     }
-
 }
